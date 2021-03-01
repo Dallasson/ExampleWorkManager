@@ -7,6 +7,7 @@ import android.widget.Button
 import android.widget.EditText
 import androidx.lifecycle.Observer
 import androidx.work.*
+import com.dz.workmanagerexample.models.JsonHolderModel
 import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
@@ -32,7 +33,7 @@ class MainActivity : AppCompatActivity() {
                     .setConstraints(constraints)
                     .build()
 
-                WorkManager.getInstance(this).enqueue(oneTimeWorkRequest)
+               WorkManager.getInstance(this).enqueue(oneTimeWorkRequest)
 
 
                 // TODO : We can the status of our request by either ID or Tag
@@ -49,69 +50,17 @@ class MainActivity : AppCompatActivity() {
                     .getWorkInfoByIdLiveData(oneTimeWorkRequest.id)
                     .observe(this, Observer {
                         Log.d("TAG","Code Status ${it.state}")
-                    })
 
+                        // TODO : Getting Data From Workmanager
+                        if(it.state.isFinished){
+                            val data = it.outputData
+                            val jsonModel : Array<String> = data.getStringArray("value")!!
+                            Log.d("TAG","Value is ${jsonModel[0]}")
 
-
-//                // TODO : Periodic Request
-//
-//                val inputData = Data.Builder()
-//                    .putInt("number",number)
-//                    .build()
-//
-//                val periodicRequestConstraints  = Constraints.Builder()
-//                    .setRequiredNetworkType(NetworkType.CONNECTED)
-//                    .build()
-//
-//                val periodicWorkRequest = PeriodicWorkRequestBuilder<ExampleWorker>(
-//                    15,TimeUnit.MINUTES)
-//                    .setInputData(inputData)
-//                    .setConstraints(periodicRequestConstraints)
-//                    .addTag("periodic")
-//                    .build()
-//
-//
-//                WorkManager.getInstance(this).enqueue(periodicWorkRequest)
-//
-//
-//                // TODO : By Id
-//                WorkManager.getInstance(this).getWorkInfoByIdLiveData(
-//                    periodicWorkRequest.id).observe(this, Observer {
-//                        Log.d("TAG","Periodic Status ${it.state}")
-//                })
-//
-//                // TODO : By Tag
-//                WorkManager.getInstance(this).getWorkInfosByTagLiveData("periodic")
-//                    .observe(this, Observer {
-//                        for(work in it){
-//                            Log.d("TAG","Periodic Status ${work.state}")
-//                        }
-//                    })
-//
-
-                // TODO : Chaining Requests
-
-                val oneTimeWorkRequest1 = OneTimeWorkRequestBuilder<ExampleWorker>()
-                    .setInputData(dataInput)
-                    .addTag("network")
-                    .setConstraints(constraints)
-                    .build()
-
-                val oneTimeWorkRequest2 = OneTimeWorkRequestBuilder<ExampleWorker>()
-                    .setInputData(dataInput)
-                    .addTag("network")
-                    .setConstraints(constraints)
-                    .build()
-
-
-                WorkManager.getInstance(this)
-                    .beginWith(oneTimeWorkRequest)
-                    .then(oneTimeWorkRequest1)
-                    .then(oneTimeWorkRequest2)
-                    .enqueue().state.observe(this, Observer {
-
+                        }
                     })
 
             }
+
     }
 }
